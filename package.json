@@ -1,0 +1,13 @@
+{
+  "name": "infolubuklinggau-cms",
+  "version": "1.0.0",
+  "description": "InfoLubuklinggau - Portal Berita CMS dengan Node.js Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {},
+  "author": "InfoLubuklinggau",
+  "license": "MIT"
+}

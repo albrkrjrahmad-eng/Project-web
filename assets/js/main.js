@@ -1,15 +1,13 @@
 // ========================================
 // InfoLubuklinggau - Main JavaScript
+// Backend API Version (Node.js)
 // ========================================
 
-// ========================================
-// LocalStorage Helpers (shared with admin)
-// ========================================
-function getArticles() {
-    const data = localStorage.getItem('ilg_articles');
-    return data ? JSON.parse(data) : [];
-}
+const API_BASE = '/api';
 
+// ========================================
+// Helper Functions
+// ========================================
 function timeAgo(dateStr) {
     const now = new Date();
     const date = new Date(dateStr);
@@ -39,13 +37,35 @@ function stripHtml(html) {
 }
 
 // ========================================
+// Fetch Articles from API
+// ========================================
+async function fetchArticles(params = '') {
+    try {
+        const response = await fetch(`${API_BASE}/articles${params}`);
+        if (!response.ok) return [];
+        return await response.json();
+    } catch (e) {
+        console.warn('API not available, using static content');
+        return [];
+    }
+}
+
+async function fetchArticle(id) {
+    try {
+        const response = await fetch(`${API_BASE}/articles/${id}`);
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (e) {
+        return null;
+    }
+}
+
+// ========================================
 // Render Homepage Dynamic Content
 // ========================================
-function renderHomepageArticles() {
-    const articles = getArticles().filter(a => a.status === 'published');
-    articles.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    if (articles.length === 0) return; // Keep static content if no articles
+async function renderHomepageArticles() {
+    const articles = await fetchArticles('?status=published');
+    if (articles.length === 0) return; // Keep static content if no articles from API
 
     // Render Hero Main (first article)
     const heroMain = document.getElementById('hero-main');
@@ -88,34 +108,10 @@ function renderHomepageArticles() {
         `).join('');
     }
 
-    // Render News Grid (articles 5-10)
+    // Render News Grid (articles 5+)
     const newsGrid = document.getElementById('news-grid');
-    if (newsGrid && articles.length > 4) {
-        const gridArticles = articles.slice(4, 10);
-        newsGrid.innerHTML = gridArticles.map(a => {
-            const excerpt = a.excerpt || stripHtml(a.content).substring(0, 80) + '...';
-            return `
-                <article class="news-card">
-                    <a href="article.html?id=${a.id}">
-                        <div class="news-card-image">
-                            <img src="${a.image || 'https://picsum.photos/400/250?random=' + Math.floor(Math.random()*100)}" alt="${a.title}">
-                            <span class="category-badge small">${a.category || 'Berita'}</span>
-                        </div>
-                        <div class="news-card-content">
-                            <h3>${truncateText(a.title, 65)}</h3>
-                            <p>${excerpt}</p>
-                            <div class="meta">
-                                <span><i class="far fa-clock"></i> ${timeAgo(a.createdAt)}</span>
-                                <span><i class="far fa-eye"></i> ${a.views || 0}</span>
-                            </div>
-                        </div>
-                    </a>
-                </article>
-            `;
-        }).join('');
-    } else if (newsGrid && articles.length > 1) {
-        // If we have between 2-4 articles, use them for grid too
-        const gridArticles = articles.slice(1, 7);
+    if (newsGrid && articles.length > 1) {
+        const gridArticles = articles.slice(4, 10).length > 0 ? articles.slice(4, 10) : articles.slice(1, 7);
         newsGrid.innerHTML = gridArticles.map(a => {
             const excerpt = a.excerpt || stripHtml(a.content).substring(0, 80) + '...';
             return `
@@ -156,73 +152,51 @@ function renderHomepageArticles() {
         `).join('');
     }
 
-    // Render Recent Posts in Sidebar
-    const recentPosts = document.getElementById('recent-posts');
-    if (recentPosts && articles.length > 0) {
-        const recent = articles.slice(0, 4);
-        recentPosts.innerHTML = recent.map(a => `
-            <a href="article.html?id=${a.id}" class="recent-post">
-                <img src="${a.image || 'https://picsum.photos/100/70?random=' + Math.floor(Math.random()*100)}" alt="${a.title}">
-                <div class="recent-post-info">
-                    <h4>${truncateText(a.title, 50)}</h4>
-                    <span class="meta"><i class="far fa-clock"></i> ${timeAgo(a.createdAt)}</span>
-                </div>
-            </a>
-        `).join('');
-    }
-
     // Update Breaking News Ticker
     const ticker = document.getElementById('news-ticker');
     if (ticker && articles.length > 0) {
         const tickerArticles = articles.slice(0, 5);
         const tickerHtml = tickerArticles.map(a => `<span class="ticker-item">${a.title}</span>`).join('');
-        ticker.innerHTML = tickerHtml + tickerHtml; // duplicate for infinite scroll
+        ticker.innerHTML = tickerHtml + tickerHtml;
     }
 }
 
 // ========================================
 // Render Article Page
 // ========================================
-function renderArticlePage() {
+async function renderArticlePage() {
     const params = new URLSearchParams(window.location.search);
     const id = params.get('id');
     if (!id) return;
 
-    const articles = getArticles();
-    const article = articles.find(a => a.id === id);
+    const article = await fetchArticle(id);
     if (!article) {
-        document.querySelector('.article') && (document.querySelector('.article').innerHTML = `
-            <div style="text-align:center; padding:60px 20px;">
-                <h2>Artikel Tidak Ditemukan</h2>
-                <p style="margin:15px 0;">Artikel yang Anda cari tidak tersedia atau telah dihapus.</p>
-                <a href="index.html" style="color:#e63946; font-weight:600;">← Kembali ke Beranda</a>
-            </div>
-        `);
+        const articleEl = document.querySelector('.article');
+        if (articleEl) {
+            articleEl.innerHTML = `
+                <div style="text-align:center; padding:60px 20px;">
+                    <h2>Artikel Tidak Ditemukan</h2>
+                    <p style="margin:15px 0;">Artikel yang Anda cari tidak tersedia atau telah dihapus.</p>
+                    <a href="index.html" style="color:#e63946; font-weight:600;">Kembali ke Beranda</a>
+                </div>
+            `;
+        }
         return;
-    }
-
-    // Increment views
-    const idx = articles.findIndex(a => a.id === id);
-    if (idx !== -1) {
-        articles[idx].views = (articles[idx].views || 0) + 1;
-        localStorage.setItem('ilg_articles', JSON.stringify(articles));
     }
 
     // Update page title
     document.title = article.title + ' - InfoLubuklinggau';
 
-    // Fill article header
+    // Fill article content
     const titleEl = document.querySelector('.article-title');
     if (titleEl) titleEl.textContent = article.title;
 
     const categoryBadge = document.querySelector('.article-header .category-badge');
     if (categoryBadge) categoryBadge.textContent = article.category || 'Berita';
 
-    // Author info
     const authorName = document.querySelector('.author-name');
     if (authorName) authorName.textContent = article.author || 'Redaksi';
 
-    // Date & meta
     const detailsEl = document.querySelector('.article-details');
     if (detailsEl) {
         detailsEl.innerHTML = `
@@ -232,20 +206,18 @@ function renderArticlePage() {
         `;
     }
 
-    // Featured image
     const featuredImg = document.querySelector('.article-featured-image img');
     if (featuredImg && article.image) {
         featuredImg.src = article.image;
         featuredImg.alt = article.title;
     } else if (featuredImg && !article.image) {
-        document.querySelector('.article-featured-image').style.display = 'none';
+        const figureEl = document.querySelector('.article-featured-image');
+        if (figureEl) figureEl.style.display = 'none';
     }
 
-    // Article body
     const bodyEl = document.querySelector('.article-body');
     if (bodyEl) bodyEl.innerHTML = article.content;
 
-    // Tags
     const tagsEl = document.querySelector('.article-tags');
     if (tagsEl && article.tags && article.tags.length > 0) {
         tagsEl.innerHTML = `
@@ -254,19 +226,18 @@ function renderArticlePage() {
         `;
     }
 
-    // Author box
     const authorBoxName = document.querySelector('.author-box-info h4');
     if (authorBoxName) authorBoxName.textContent = article.author || 'Redaksi';
 
-    // Breadcrumb
     const breadcrumbCurrent = document.querySelector('.breadcrumb .current');
     if (breadcrumbCurrent) breadcrumbCurrent.textContent = truncateText(article.title, 50);
 
-    // Related news (same category)
+    // Related news
     const relatedGrid = document.querySelector('.related-grid');
     if (relatedGrid) {
-        const related = articles
-            .filter(a => a.id !== id && a.status === 'published' && a.category === article.category)
+        const allArticles = await fetchArticles('?status=published');
+        const related = allArticles
+            .filter(a => a.id !== id && a.category === article.category)
             .slice(0, 3);
         if (related.length > 0) {
             relatedGrid.innerHTML = related.map(a => `
@@ -287,43 +258,24 @@ function renderArticlePage() {
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Display Current Date (Indonesian format)
+    // Display Current Date
     const dateDisplay = document.getElementById('current-date');
     if (dateDisplay) {
-        const options = { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        };
         const today = new Date();
-        dateDisplay.textContent = today.toLocaleDateString('id-ID', options);
+        dateDisplay.textContent = today.toLocaleDateString('id-ID', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
     }
 
     // Mobile Menu Toggle
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const navMenu = document.getElementById('nav-menu');
-    
     if (mobileMenuBtn && navMenu) {
         mobileMenuBtn.addEventListener('click', function() {
             navMenu.classList.toggle('active');
             const icon = this.querySelector('i');
-            if (navMenu.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
-        });
-
-        document.addEventListener('click', function(e) {
-            if (!navMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
-                navMenu.classList.remove('active');
-                const icon = mobileMenuBtn.querySelector('i');
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
         });
     }
 
@@ -331,88 +283,54 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchBtn = document.getElementById('search-btn');
     const searchOverlay = document.getElementById('search-overlay');
     const searchClose = document.getElementById('search-close');
-    
     if (searchBtn && searchOverlay && searchClose) {
-        searchBtn.addEventListener('click', function() {
+        searchBtn.addEventListener('click', () => {
             searchOverlay.classList.add('active');
             searchOverlay.querySelector('.search-input').focus();
         });
-
-        searchClose.addEventListener('click', function() {
-            searchOverlay.classList.remove('active');
-        });
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                searchOverlay.classList.remove('active');
-            }
-        });
-
-        searchOverlay.addEventListener('click', function(e) {
-            if (e.target === searchOverlay) {
-                searchOverlay.classList.remove('active');
-            }
-        });
+        searchClose.addEventListener('click', () => searchOverlay.classList.remove('active'));
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') searchOverlay.classList.remove('active'); });
     }
 
-    // Back to Top Button
+    // Back to Top
     const backToTop = document.getElementById('back-to-top');
     if (backToTop) {
-        window.addEventListener('scroll', function() {
-            if (window.pageYOffset > 300) {
-                backToTop.classList.add('visible');
-            } else {
-                backToTop.classList.remove('visible');
-            }
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.pageYOffset > 300);
         });
-
-        backToTop.addEventListener('click', function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
     }
 
     // Navbar hide on scroll
     const mainNav = document.querySelector('.main-nav');
     if (mainNav) {
         let lastScroll = 0;
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', () => {
             const currentScroll = window.pageYOffset;
-            if (currentScroll > lastScroll && currentScroll > 200) {
-                mainNav.style.transform = 'translateY(-100%)';
-            } else {
-                mainNav.style.transform = 'translateY(0)';
-            }
+            mainNav.style.transform = (currentScroll > lastScroll && currentScroll > 200) ? 'translateY(-100%)' : 'translateY(0)';
             lastScroll = currentScroll;
         });
     }
 
-    // Reading progress (for article pages)
+    // Reading progress bar
     const progressBar = document.querySelector('.reading-progress');
     if (progressBar) {
-        window.addEventListener('scroll', function() {
+        window.addEventListener('scroll', () => {
             const scrollTop = window.pageYOffset;
             const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const progress = (scrollTop / docHeight) * 100;
-            progressBar.style.width = progress + '%';
+            progressBar.style.width = (scrollTop / docHeight) * 100 + '%';
         });
     }
 
     // ========================================
     // Dynamic Content Rendering
     // ========================================
-    
-    // Check if we're on the homepage
     const isHomepage = document.getElementById('hero-main');
-    if (isHomepage) {
-        renderHomepageArticles();
-    }
+    if (isHomepage) renderHomepageArticles();
 
-    // Check if we're on article page
     const isArticlePage = document.querySelector('.article-body');
     const hasIdParam = new URLSearchParams(window.location.search).get('id');
-    if (isArticlePage && hasIdParam) {
-        renderArticlePage();
-    }
+    if (isArticlePage && hasIdParam) renderArticlePage();
 
     console.log('InfoLubuklinggau Portal loaded successfully!');
 });

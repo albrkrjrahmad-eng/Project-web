@@ -1,53 +1,82 @@
 // ========================================
 // InfoLubuklinggau - Admin Panel JavaScript
+// Backend API Version (Node.js)
 // ========================================
 
-// ========================================
-// Authentication System
-// ========================================
-// Default credentials - UBAH INI untuk keamanan Anda!
-const ADMIN_ACCOUNTS = [
-    { username: 'admin', password: 'admin123', name: 'Administrator' },
-    { username: 'redaksi', password: 'redaksi123', name: 'Redaksi' }
-];
+const API_BASE = '/api';
 
-function isLoggedIn() {
-    const session = sessionStorage.getItem('ilg_admin_session');
-    return session ? JSON.parse(session) : null;
+// ========================================
+// Authentication System (JWT + API)
+// ========================================
+function getToken() {
+    return localStorage.getItem('ilg_token');
 }
 
-function login(username, password) {
-    const account = ADMIN_ACCOUNTS.find(
-        a => a.username === username && a.password === password
-    );
-    if (account) {
-        sessionStorage.setItem('ilg_admin_session', JSON.stringify({
-            username: account.username,
-            name: account.name,
-            loginTime: new Date().toISOString()
-        }));
-        return true;
+function setToken(token) {
+    localStorage.setItem('ilg_token', token);
+}
+
+function removeToken() {
+    localStorage.removeItem('ilg_token');
+    localStorage.removeItem('ilg_user');
+}
+
+function getUser() {
+    const user = localStorage.getItem('ilg_user');
+    return user ? JSON.parse(user) : null;
+}
+
+function setUser(user) {
+    localStorage.setItem('ilg_user', JSON.stringify(user));
+}
+
+async function apiRequest(endpoint, method = 'GET', body = null) {
+    const headers = { 'Content-Type': 'application/json' };
+    const token = getToken();
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
+
+    const response = await fetch(`${API_BASE}${endpoint}`, options);
+    const data = await response.json();
+
+    if (response.status === 401) {
+        removeToken();
+        checkAuth();
+        throw new Error('Session expired');
     }
-    return false;
+
+    if (!response.ok) {
+        throw new Error(data.error || 'Request failed');
+    }
+
+    return data;
 }
 
-function logout() {
-    sessionStorage.removeItem('ilg_admin_session');
-    window.location.reload();
-}
-
-function checkAuth() {
-    const session = isLoggedIn();
+async function checkAuth() {
     const loginOverlay = document.getElementById('login-overlay');
-    
-    if (session) {
-        // User is logged in - hide login, show admin
-        loginOverlay.classList.add('hidden');
-        document.getElementById('admin-name').textContent = session.name;
-    } else {
-        // Not logged in - show login screen
+    const token = getToken();
+
+    if (!token) {
         loginOverlay.classList.remove('hidden');
+        return false;
     }
+
+    try {
+        const data = await apiRequest('/auth/verify');
+        if (data.valid) {
+            loginOverlay.classList.add('hidden');
+            document.getElementById('admin-name').textContent = data.user.name || data.user.username;
+            return true;
+        }
+    } catch (e) {
+        // Token invalid
+    }
+
+    removeToken();
+    loginOverlay.classList.remove('hidden');
+    return false;
 }
 
 function initAuth() {
@@ -55,17 +84,22 @@ function initAuth() {
     const loginError = document.getElementById('login-error');
     const logoutBtn = document.getElementById('btn-logout');
 
-    loginForm.addEventListener('submit', function(e) {
+    loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value;
+        loginError.textContent = '';
 
-        if (login(username, password)) {
-            loginError.textContent = '';
-            checkAuth();
+        try {
+            const data = await apiRequest('/auth/login', 'POST', { username, password });
+            setToken(data.token);
+            setUser(data.user);
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('admin-name').textContent = data.user.name;
             refreshDashboard();
-        } else {
-            loginError.textContent = 'Username atau password salah!';
+            showToast('Login berhasil!', 'success');
+        } catch (err) {
+            loginError.textContent = err.message || 'Username atau password salah!';
             document.getElementById('login-password').value = '';
             document.getElementById('login-password').focus();
         }
@@ -73,50 +107,25 @@ function initAuth() {
 
     logoutBtn.addEventListener('click', function() {
         if (confirm('Yakin ingin keluar dari panel admin?')) {
-            logout();
+            removeToken();
+            window.location.reload();
         }
     });
 
     checkAuth();
 }
 
+// ========================================
 // Categories list
+// ========================================
 const DEFAULT_CATEGORIES = [
     'Pemerintahan', 'Kriminal', 'Pendidikan', 'Kesehatan',
     'Olahraga', 'Ekonomi', 'Teknologi', 'Gaya Hidup', 'Politik', 'Opini'
 ];
 
 // ========================================
-// LocalStorage Helpers
+// Helper Functions
 // ========================================
-function getArticles() {
-    const data = localStorage.getItem('ilg_articles');
-    return data ? JSON.parse(data) : [];
-}
-
-function saveArticles(articles) {
-    localStorage.setItem('ilg_articles', JSON.stringify(articles));
-}
-
-function generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-}
-
-function generateSlug(title) {
-    return title.toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
-}
-
-function formatDate(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('id-ID', {
-        day: 'numeric', month: 'long', year: 'numeric'
-    });
-}
-
 function formatDateShort(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleDateString('id-ID', {
@@ -124,15 +133,9 @@ function formatDateShort(dateStr) {
     });
 }
 
-function timeAgo(dateStr) {
-    const now = new Date();
-    const date = new Date(dateStr);
-    const diff = Math.floor((now - date) / 1000);
-    if (diff < 60) return 'Baru saja';
-    if (diff < 3600) return Math.floor(diff / 60) + ' menit lalu';
-    if (diff < 86400) return Math.floor(diff / 3600) + ' jam lalu';
-    if (diff < 604800) return Math.floor(diff / 86400) + ' hari lalu';
-    return formatDateShort(dateStr);
+function truncate(str, len) {
+    if (!str) return '';
+    return str.length > len ? str.substring(0, len) + '...' : str;
 }
 
 // ========================================
@@ -188,17 +191,14 @@ function hideModal() {
 // Navigation
 // ========================================
 function navigateTo(page) {
-    // Update nav items
     document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
     const activeNav = document.querySelector(`.nav-item[data-page="${page}"]`);
     if (activeNav) activeNav.classList.add('active');
 
-    // Show page
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     const targetPage = document.getElementById(`page-${page}`);
     if (targetPage) targetPage.classList.add('active');
 
-    // Refresh page content
     if (page === 'dashboard') refreshDashboard();
     if (page === 'articles') refreshArticlesList();
     if (page === 'categories') refreshCategories();
@@ -208,54 +208,59 @@ function navigateTo(page) {
 // ========================================
 // Dashboard
 // ========================================
-function refreshDashboard() {
-    const articles = getArticles();
-    const published = articles.filter(a => a.status === 'published');
-    const drafts = articles.filter(a => a.status === 'draft');
-    const categories = [...new Set(articles.map(a => a.category).filter(Boolean))];
+async function refreshDashboard() {
+    try {
+        const stats = await apiRequest('/stats');
+        document.getElementById('stat-total').textContent = stats.total;
+        document.getElementById('stat-published').textContent = stats.published;
+        document.getElementById('stat-draft').textContent = stats.draft;
+        document.getElementById('stat-categories').textContent = stats.categories;
 
-    document.getElementById('stat-total').textContent = articles.length;
-    document.getElementById('stat-published').textContent = published.length;
-    document.getElementById('stat-draft').textContent = drafts.length;
-    document.getElementById('stat-categories').textContent = categories.length;
+        // Recent articles
+        const articles = await apiRequest('/articles');
+        const recent = articles.slice(0, 5);
+        const tbody = document.getElementById('recent-articles');
 
-    // Recent articles (last 5)
-    const recent = articles.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
-    const tbody = document.getElementById('recent-articles');
-
-    if (recent.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada artikel. <a href="#" data-page="add-article" style="color:#4f46e5;">Buat artikel pertama</a></td></tr>';
-    } else {
-        tbody.innerHTML = recent.map(article => `
-            <tr>
-                <td><strong>${truncate(article.title, 50)}</strong></td>
-                <td>${article.category || '-'}</td>
-                <td>${formatDateShort(article.createdAt)}</td>
-                <td><span class="status-badge ${article.status}">${article.status === 'published' ? 'Dipublikasi' : 'Draft'}</span></td>
-            </tr>
-        `).join('');
+        if (recent.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Belum ada artikel. <a href="#" data-page="add-article" style="color:#4f46e5;">Buat artikel pertama</a></td></tr>';
+        } else {
+            tbody.innerHTML = recent.map(article => `
+                <tr>
+                    <td><strong>${truncate(article.title, 50)}</strong></td>
+                    <td>${article.category || '-'}</td>
+                    <td>${formatDateShort(article.createdAt)}</td>
+                    <td><span class="status-badge ${article.status}">${article.status === 'published' ? 'Dipublikasi' : 'Draft'}</span></td>
+                </tr>
+            `).join('');
+        }
+    } catch (err) {
+        console.error('Dashboard error:', err);
     }
-}
-
-function truncate(str, len) {
-    return str.length > len ? str.substring(0, len) + '...' : str;
 }
 
 // ========================================
 // Articles List
 // ========================================
-function refreshArticlesList() {
-    const articles = getArticles();
+let allArticles = [];
+
+async function refreshArticlesList() {
+    try {
+        allArticles = await apiRequest('/articles');
+        renderArticlesList();
+    } catch (err) {
+        console.error('Articles list error:', err);
+    }
+}
+
+function renderArticlesList() {
     const filterCategory = document.getElementById('filter-category').value;
     const filterStatus = document.getElementById('filter-status').value;
     const searchTerm = document.getElementById('search-articles').value.toLowerCase();
 
-    let filtered = articles;
+    let filtered = allArticles;
     if (filterCategory) filtered = filtered.filter(a => a.category === filterCategory);
     if (filterStatus) filtered = filtered.filter(a => a.status === filterStatus);
     if (searchTerm) filtered = filtered.filter(a => a.title.toLowerCase().includes(searchTerm));
-
-    filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     const tbody = document.getElementById('articles-list');
     const countEl = document.getElementById('article-count');
@@ -283,16 +288,13 @@ function refreshArticlesList() {
         `).join('');
     }
 
-    // Update category filter options
     populateCategoryFilter();
 }
 
 function populateCategoryFilter() {
     const select = document.getElementById('filter-category');
     const current = select.value;
-    const articles = getArticles();
-    const categories = [...new Set(articles.map(a => a.category).filter(Boolean))];
-
+    const categories = [...new Set(allArticles.map(a => a.category).filter(Boolean))];
     select.innerHTML = '<option value="">Semua Kategori</option>' +
         categories.map(c => `<option value="${c}" ${c === current ? 'selected' : ''}>${c}</option>`).join('');
 }
@@ -300,7 +302,7 @@ function populateCategoryFilter() {
 // ========================================
 // CRUD Operations
 // ========================================
-function saveArticle(status) {
+async function saveArticle(status) {
     const id = document.getElementById('article-id').value;
     const title = document.getElementById('article-title').value.trim();
     const excerpt = document.getElementById('article-excerpt').value.trim();
@@ -311,7 +313,6 @@ function saveArticle(status) {
     const tagsInput = document.getElementById('article-tags').value.trim();
     const tags = tagsInput ? tagsInput.split(',').map(t => t.trim()).filter(Boolean) : [];
 
-    // Validation
     if (!title) {
         showToast('Judul artikel wajib diisi!', 'error');
         document.getElementById('article-title').focus();
@@ -323,73 +324,61 @@ function saveArticle(status) {
         return;
     }
 
-    const articles = getArticles();
-    const now = new Date().toISOString();
+    const body = { title, excerpt, content, image, category, author, tags, status };
 
-    if (id) {
-        // Edit existing
-        const index = articles.findIndex(a => a.id === id);
-        if (index !== -1) {
-            articles[index] = {
-                ...articles[index],
-                title, excerpt, content, image, category, author, tags, status,
-                slug: generateSlug(title),
-                updatedAt: now
-            };
-            saveArticles(articles);
+    try {
+        if (id) {
+            await apiRequest(`/articles/${id}`, 'PUT', body);
             showToast('Artikel berhasil diperbarui!', 'success');
+        } else {
+            await apiRequest('/articles', 'POST', body);
+            showToast(status === 'published' ? 'Artikel berhasil dipublikasikan!' : 'Draft berhasil disimpan!', 'success');
         }
-    } else {
-        // Create new
-        const article = {
-            id: generateId(),
-            title, excerpt, content, image, category, author, tags, status,
-            slug: generateSlug(title),
-            views: 0,
-            createdAt: now,
-            updatedAt: now
-        };
-        articles.push(article);
-        saveArticles(articles);
-        showToast(status === 'published' ? 'Artikel berhasil dipublikasikan!' : 'Draft berhasil disimpan!', 'success');
+        navigateTo('articles');
+    } catch (err) {
+        showToast(err.message || 'Gagal menyimpan artikel', 'error');
     }
-
-    navigateTo('articles');
 }
 
-function editArticle(id) {
-    const articles = getArticles();
-    const article = articles.find(a => a.id === id);
-    if (!article) return;
+async function editArticle(id) {
+    try {
+        const article = await apiRequest(`/articles/${id}`);
+        
+        document.getElementById('article-id').value = article.id;
+        document.getElementById('article-title').value = article.title;
+        document.getElementById('article-excerpt').value = article.excerpt || '';
+        document.getElementById('article-content').innerHTML = article.content || '';
+        document.getElementById('article-image').value = article.image || '';
+        document.getElementById('article-category').value = article.category || '';
+        document.getElementById('article-author').value = article.author || '';
+        document.getElementById('article-tags').value = (article.tags || []).join(', ');
+        document.getElementById('form-title').textContent = 'Edit Artikel';
 
-    document.getElementById('article-id').value = article.id;
-    document.getElementById('article-title').value = article.title;
-    document.getElementById('article-excerpt').value = article.excerpt || '';
-    document.getElementById('article-content').innerHTML = article.content || '';
-    document.getElementById('article-image').value = article.image || '';
-    document.getElementById('article-category').value = article.category || '';
-    document.getElementById('article-author').value = article.author || '';
-    document.getElementById('article-tags').value = (article.tags || []).join(', ');
-    document.getElementById('form-title').textContent = 'Edit Artikel';
+        if (article.image) {
+            document.getElementById('image-preview').innerHTML = `<img src="${article.image}" alt="Preview">`;
+        }
 
-    // Show image preview
-    if (article.image) {
-        document.getElementById('image-preview').innerHTML = `<img src="${article.image}" alt="Preview">`;
+        // Navigate to form without resetting
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        const activeNav = document.querySelector('.nav-item[data-page="add-article"]');
+        if (activeNav) activeNav.classList.add('active');
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-add-article').classList.add('active');
+    } catch (err) {
+        showToast('Gagal memuat artikel', 'error');
     }
-
-    navigateTo('add-article');
-    // Keep form data (don't reset)
-    document.getElementById('article-id').value = article.id;
-    document.getElementById('form-title').textContent = 'Edit Artikel';
 }
 
 function deleteArticle(id) {
-    showModal('Apakah Anda yakin ingin menghapus artikel ini? Aksi ini tidak dapat dibatalkan.', () => {
-        const articles = getArticles().filter(a => a.id !== id);
-        saveArticles(articles);
-        showToast('Artikel berhasil dihapus!', 'success');
-        refreshArticlesList();
-        refreshDashboard();
+    showModal('Apakah Anda yakin ingin menghapus artikel ini? Aksi ini tidak dapat dibatalkan.', async () => {
+        try {
+            await apiRequest(`/articles/${id}`, 'DELETE');
+            showToast('Artikel berhasil dihapus!', 'success');
+            refreshArticlesList();
+            refreshDashboard();
+        } catch (err) {
+            showToast('Gagal menghapus artikel', 'error');
+        }
     });
 }
 
@@ -414,7 +403,6 @@ function resetForm() {
 // Categories
 // ========================================
 function refreshCategories() {
-    const articles = getArticles();
     const grid = document.getElementById('category-grid');
     const icons = {
         'Pemerintahan': 'fa-landmark',
@@ -430,7 +418,7 @@ function refreshCategories() {
     };
 
     grid.innerHTML = DEFAULT_CATEGORIES.map(cat => {
-        const count = articles.filter(a => a.category === cat).length;
+        const count = allArticles.filter(a => a.category === cat).length;
         return `
             <div class="category-card">
                 <i class="fas ${icons[cat] || 'fa-folder'}"></i>
@@ -444,37 +432,57 @@ function refreshCategories() {
 }
 
 // ========================================
-// Settings - Export / Import / Reset
+// Settings - Export / Import
 // ========================================
-function exportArticles() {
-    const articles = getArticles();
-    if (articles.length === 0) {
-        showToast('Tidak ada artikel untuk di-export', 'warning');
-        return;
+async function exportArticles() {
+    try {
+        const articles = await apiRequest('/articles');
+        if (articles.length === 0) {
+            showToast('Tidak ada artikel untuk di-export', 'warning');
+            return;
+        }
+        const blob = new Blob([JSON.stringify(articles, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `infolubuklinggau-articles-${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast(`${articles.length} artikel berhasil di-export!`, 'success');
+    } catch (err) {
+        showToast('Gagal export artikel', 'error');
     }
-    const blob = new Blob([JSON.stringify(articles, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `infolubuklinggau-articles-${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showToast(`${articles.length} artikel berhasil di-export!`, 'success');
 }
 
-function importArticles(file) {
+async function importArticles(file) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
         try {
             const imported = JSON.parse(e.target.result);
             if (!Array.isArray(imported)) {
                 showToast('Format file tidak valid!', 'error');
                 return;
             }
-            const existing = getArticles();
-            const merged = [...existing, ...imported.map(a => ({ ...a, id: generateId() }))];
-            saveArticles(merged);
-            showToast(`${imported.length} artikel berhasil di-import!`, 'success');
+
+            let count = 0;
+            for (const article of imported) {
+                try {
+                    await apiRequest('/articles', 'POST', {
+                        title: article.title,
+                        excerpt: article.excerpt || '',
+                        content: article.content || '',
+                        image: article.image || '',
+                        category: article.category || '',
+                        author: article.author || '',
+                        tags: article.tags || [],
+                        status: article.status || 'draft'
+                    });
+                    count++;
+                } catch (err) {
+                    console.error('Import error for article:', article.title);
+                }
+            }
+            showToast(`${count} artikel berhasil di-import!`, 'success');
             refreshDashboard();
             refreshArticlesList();
         } catch (err) {
@@ -485,11 +493,19 @@ function importArticles(file) {
 }
 
 function resetAllData() {
-    showModal('PERINGATAN: Semua artikel akan dihapus permanen. Lanjutkan?', () => {
-        localStorage.removeItem('ilg_articles');
-        showToast('Semua data berhasil direset!', 'success');
-        refreshDashboard();
-        refreshArticlesList();
+    showModal('PERINGATAN: Semua artikel akan dihapus permanen. Lanjutkan?', async () => {
+        try {
+            const articles = await apiRequest('/articles');
+            const ids = articles.map(a => a.id);
+            if (ids.length > 0) {
+                await apiRequest('/articles/bulk-delete', 'POST', { ids });
+            }
+            showToast('Semua data berhasil direset!', 'success');
+            refreshDashboard();
+            refreshArticlesList();
+        } catch (err) {
+            showToast('Gagal mereset data', 'error');
+        }
     });
 }
 
@@ -501,27 +517,13 @@ function execCommand(command) {
     editor.focus();
 
     switch (command) {
-        case 'bold':
-            document.execCommand('bold', false, null);
-            break;
-        case 'italic':
-            document.execCommand('italic', false, null);
-            break;
-        case 'underline':
-            document.execCommand('underline', false, null);
-            break;
-        case 'heading':
-            document.execCommand('formatBlock', false, '<h2>');
-            break;
-        case 'quote':
-            document.execCommand('formatBlock', false, '<blockquote>');
-            break;
-        case 'ul':
-            document.execCommand('insertUnorderedList', false, null);
-            break;
-        case 'ol':
-            document.execCommand('insertOrderedList', false, null);
-            break;
+        case 'bold': document.execCommand('bold', false, null); break;
+        case 'italic': document.execCommand('italic', false, null); break;
+        case 'underline': document.execCommand('underline', false, null); break;
+        case 'heading': document.execCommand('formatBlock', false, '<h2>'); break;
+        case 'quote': document.execCommand('formatBlock', false, '<blockquote>'); break;
+        case 'ul': document.execCommand('insertUnorderedList', false, null); break;
+        case 'ol': document.execCommand('insertOrderedList', false, null); break;
         case 'link':
             const url = prompt('Masukkan URL:');
             if (url) document.execCommand('createLink', false, url);
@@ -567,10 +569,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Save Draft
+    // Save Draft & Publish
     document.getElementById('btn-save-draft').addEventListener('click', () => saveArticle('draft'));
-
-    // Publish
     document.getElementById('btn-publish').addEventListener('click', () => saveArticle('published'));
 
     // Image Preview
@@ -592,36 +592,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Filter & Search
-    document.getElementById('filter-category').addEventListener('change', refreshArticlesList);
-    document.getElementById('filter-status').addEventListener('change', refreshArticlesList);
-    document.getElementById('search-articles').addEventListener('input', refreshArticlesList);
+    document.getElementById('filter-category').addEventListener('change', renderArticlesList);
+    document.getElementById('filter-status').addEventListener('change', renderArticlesList);
+    document.getElementById('search-articles').addEventListener('input', renderArticlesList);
 
     // Select All checkbox
     document.getElementById('select-all').addEventListener('change', function() {
-        document.querySelectorAll('.article-checkbox').forEach(cb => {
-            cb.checked = this.checked;
-        });
+        document.querySelectorAll('.article-checkbox').forEach(cb => cb.checked = this.checked);
         toggleDeleteSelected();
     });
 
-    // Watch for individual checkboxes
     document.getElementById('articles-list').addEventListener('change', function(e) {
-        if (e.target.classList.contains('article-checkbox')) {
-            toggleDeleteSelected();
-        }
+        if (e.target.classList.contains('article-checkbox')) toggleDeleteSelected();
     });
 
     // Delete Selected
     document.getElementById('delete-selected').addEventListener('click', function() {
         const checked = document.querySelectorAll('.article-checkbox:checked');
         if (checked.length === 0) return;
-        showModal(`Hapus ${checked.length} artikel yang dipilih?`, () => {
-            const ids = Array.from(checked).map(cb => cb.value);
-            const articles = getArticles().filter(a => !ids.includes(a.id));
-            saveArticles(articles);
-            showToast(`${ids.length} artikel berhasil dihapus!`, 'success');
-            refreshArticlesList();
-            refreshDashboard();
+        showModal(`Hapus ${checked.length} artikel yang dipilih?`, async () => {
+            try {
+                const ids = Array.from(checked).map(cb => cb.value);
+                await apiRequest('/articles/bulk-delete', 'POST', { ids });
+                showToast(`${ids.length} artikel berhasil dihapus!`, 'success');
+                refreshArticlesList();
+                refreshDashboard();
+            } catch (err) {
+                showToast('Gagal menghapus artikel', 'error');
+            }
         });
     });
 
@@ -638,14 +636,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Settings
     document.getElementById('btn-export').addEventListener('click', exportArticles);
-    document.getElementById('btn-import').addEventListener('click', () => {
-        document.getElementById('import-file').click();
-    });
+    document.getElementById('btn-import').addEventListener('click', () => document.getElementById('import-file').click());
     document.getElementById('import-file').addEventListener('change', function() {
-        if (this.files[0]) {
-            importArticles(this.files[0]);
-            this.value = '';
-        }
+        if (this.files[0]) { importArticles(this.files[0]); this.value = ''; }
     });
     document.getElementById('btn-reset').addEventListener('click', resetAllData);
 
@@ -655,6 +648,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleDeleteSelected() {
     const checked = document.querySelectorAll('.article-checkbox:checked');
-    const deleteBtn = document.getElementById('delete-selected');
-    deleteBtn.style.display = checked.length > 0 ? 'inline-flex' : 'none';
+    document.getElementById('delete-selected').style.display = checked.length > 0 ? 'inline-flex' : 'none';
 }
