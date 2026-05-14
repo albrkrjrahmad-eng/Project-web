@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InfoLubuklinggau - Portal Berita Lubuklinggau Terkini</title>
+    <meta name="description" content="Portal berita terkini seputar Kota Lubuklinggau dan sekitarnya. Berita terbaru, terpercaya, dan aktual.">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-left">
+                <span class="date-display"><i class="far fa-calendar-alt"></i> <span id="current-date"></span></span>
+                <span class="separator">|</span>
+                <span class="weather"><i class="fas fa-cloud-sun"></i> 32°C Lubuklinggau</span>
+            </div>
+            <div class="top-bar-right">
+                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <a href="index.html" class="logo">
+                    <span class="logo-text">Info<span class="logo-highlight">Lubuklinggau</span></span>
+                    <span class="logo-tagline">Portal Berita Terpercaya</span>
+                </a>
+                <div class="header-ad">
+                    <div class="ad-placeholder">
+                        <span>IKLAN BANNER 728x90</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <button class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-menu" id="nav-menu">
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> Beranda</a></li>
+                <li class="has-dropdown">
+                    <a href="#">Berita <i class="fas fa-chevron-down"></i></a>
+                    <ul class="dropdown">
+                        <li><a href="#">Pemerintahan</a></li>
+                        <li><a href="#">Kriminal</a></li>
+                        <li><a href="#">Pendidikan</a></li>
+                        <li><a href="#">Kesehatan</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">Politik</a></li>
+                <li><a href="#">Ekonomi</a></li>
+                <li><a href="#">Olahraga</a></li>
+                <li><a href="#">Teknologi</a></li>
+                <li><a href="#">Gaya Hidup</a></li>
+                <li><a href="#">Opini</a></li>
+            </ul>
+            <div class="nav-search">
+                <button class="search-btn" id="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="search-overlay">
+        <div class="search-overlay-content">
+            <button class="search-close" id="search-close"><i class="fas fa-times"></i></button>
+            <form class="search-form">
+                <input type="text" placeholder="Cari berita..." class="search-input">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Breaking News Ticker -->
+    <div class="breaking-news">
+        <div class="container">
+            <span class="breaking-label"><i class="fas fa-bolt"></i> Breaking</span>
+            <div class="ticker-wrap">
+                <div class="ticker" id="news-ticker">
+                    <span class="ticker-item">Walikota Lubuklinggau resmikan jembatan baru penghubung dua kecamatan</span>
+                    <span class="ticker-item">Tim SAR evakuasi korban banjir di Kelurahan Taba Pingin</span>
+                    <span class="ticker-item">DPRD Lubuklinggau sahkan Perda baru tentang pengelolaan sampah</span>
+                    <span class="ticker-item">Festival Budaya Lubuklinggau 2026 akan digelar bulan depan</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-main">
+                    <a href="article.html" class="hero-card">
+                        <div class="hero-image">
+                            <img src="https://picsum.photos/800/500?random=1" alt="Berita Utama">
+                            <span class="category-badge">Pemerintahan</span>
+                        </div>
+                        <div class="hero-info">
+                            <h1>Walikota Lubuklinggau Resmikan Proyek Infrastruktur Senilai Rp 50 Miliar untuk Peningkatan Jalan</h1>
+                            <p>Proyek infrastruktur ini mencakup pelebaran jalan utama, pembangunan trotoar, dan penataan drainase di beberapa titik strategis kota...</p>
+                            <div class="meta">
+                                <span><i class="far fa-clock"></i> 2 jam lalu</span>
+                                <span><i class="far fa-eye"></i> 1.2K views</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="hero-sidebar">
+                    <a href="article.html" class="hero-side-card">
+                        <div class="hero-side-image">
+                            <img src="https://picsum.photos/400/250?random=2" alt="Berita">
+                        </div>
+                        <div class="hero-side-info">
+                            <span class="category-badge small">Pendidikan</span>
+                            <h3>SMAN 1 Lubuklinggau Raih Juara Olimpiade Sains Tingkat Provinsi</h3>
+                            <span class="meta"><i class="far fa-clock"></i> 3 jam lalu</span>
+                        </div>
+                    </a>
+                    <a href="article.html" class="hero-side-card">
+                        <div class="hero-side-image">
+                            <img src="https://picsum.photos/400/250?random=3" alt="Berita">
+                        </div>
+                        <div class="hero-side-info">
+                            <span class="category-badge small">Olahraga</span>
+                            <h3>Atlet Lubuklinggau Sumbang Emas di PON XXI 2026</h3>
+                            <span class="meta"><i class="far fa-clock"></i> 5 jam lalu</span>
+                        </div>
+                    </a>
+                    <a href="article.html" class="hero-side-card">
+                        <div class="hero-side-image">
+                            <img src="https://picsum.photos/400/250?random=4" alt="Berita">
+                        </div>
+                        <div class="hero-side-info">
+                            <span class="category-badge small">Ekonomi</span>
+                            <h3>Pasar Tradisional Lubuklinggau Direvitalisasi, Pedagang Senang</h3>
+                            <span class="meta"><i class="far fa-clock"></i> 6 jam lalu</span>
+                        </div>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Main Column -->
+                <div class="main-column">
+                    <!-- Berita Terkini -->
+                    <section class="news-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-newspaper"></i> Berita Terkini</h2>
+                            <a href="#" class="view-all">Lihat Semua <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="news-grid">
+                            <article class="news-card">
+                                <a href="article.html">
+                                    <div class="news-card-image">
+                                        <img src="https://picsum.photos/400/250?random=5" alt="Berita">
+                                        <span class="category-badge small">Kriminal</span>
+                                    </div>
+                                    <div class="news-card-content">
+                                        <h3>Polres Lubuklinggau Ungkap Jaringan Narkoba Lintas Provinsi</h3>
+                                        <p>Sebanyak 2 kg sabu-sabu berhasil diamankan dalam operasi gabungan...</p>
+                                        <div class="meta">
+                                            <span><i class="far fa-clock"></i> 7 jam lalu</span>
+                                            <span><i class="far fa-comments"></i> 24</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                            <article class="news-card">
+                                <a href="article.html">
+                                    <div class="news-card-image">
+                                        <img src="https://picsum.photos/400/250?random=6" alt="Berita">
+                                        <span class="category-badge small">Kesehatan</span>
+                                    </div>
+                                    <div class="news-card-content">
+                                        <h3>RSUD Lubuklinggau Tambah Fasilitas ICU Modern Berstandar Internasional</h3>
+                                        <p>Penambahan 20 bed ICU baru dilengkapi ventilator generasi terbaru...</p>
+                                        <div class="meta">
+                                            <span><i class="far fa-clock"></i> 8 jam lalu</span>
+                                            <span><i class="far fa-comments"></i> 12</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                            <article class="news-card">
+                                <a href="article.html">
+                                    <div class="news-card-image">
+                                        <img src="https://picsum.photos/400/250?random=7" alt="Berita">
+                                        <span class="category-badge small">Teknologi</span>
+                                    </div>
+                                    <div class="news-card-content">
+                                        <h3>Smart City Lubuklinggau: 50 CCTV Baru Terpasang di Titik Rawan</h3>
+                                        <p>Program Smart City terus digalakkan dengan pemasangan CCTV berbasis AI...</p>
+                                        <div class="meta">
+                                            <span><i class="far fa-clock"></i> 10 jam lalu</span>
+                                            <span><i class="far fa-comments"></i> 8</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                            <article class="news-card">
+                                <a href="article.html">
+                                    <div class="news-card-image">
+                                        <img src="https://picsum.photos/400/250?random=8" alt="Berita">
+                                        <span class="category-badge small">Gaya Hidup</span>
+                                    </div>
+                                    <div class="news-card-content">
+                                        <h3>Wisata Alam Air Terjun Temam Jadi Destinasi Favorit Libur Panjang</h3>
+                                        <p>Ribuan wisatawan padati objek wisata Air Terjun Temam selama libur panjang...</p>
+                                        <div class="meta">
+                                            <span><i class="far fa-clock"></i> 12 jam lalu</span>
+                                            <span><i class="far fa-comments"></i> 31</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                            <article class="news-card">
+                                <a href="article.html">
+                                    <div class="news-card-image">
+                                        <img src="https://picsum.photos/400/250?random=9" alt="Berita">
+                                        <span class="category-badge small">Politik</span>
+                                    </div>
+                                    <div class="news-card-content">
+                                        <h3>Pilkada Lubuklinggau 2026: KPU Tetapkan DPT Sebanyak 180 Ribu Pemilih</h3>
+                                        <p>Komisi Pemilihan Umum Kota Lubuklinggau resmi menetapkan daftar pemilih tetap...</p>
+                                        <div class="meta">
+                                            <span><i class="far fa-clock"></i> 14 jam lalu</span>
+                                            <span><i class="far fa-comments"></i> 45</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                            <article class="news-card">
+                                <a href="article.html">
+                                    <div class="news-card-image">
+                                        <img src="https://picsum.photos/400/250?random=10" alt="Berita">
+                                        <span class="category-badge small">Pendidikan</span>
+                                    </div>
+                                    <div class="news-card-content">
+                                        <h3>Universitas Musi Rawas Buka Program Studi Baru Teknologi Informasi</h3>
+                                        <p>Program studi baru ini dibuka untuk menjawab kebutuhan SDM digital di era industri 4.0...</p>
+                                        <div class="meta">
+                                            <span><i class="far fa-clock"></i> 16 jam lalu</span>
+                                            <span><i class="far fa-comments"></i> 7</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </article>
+                        </div>
+                    </section>
+
+                    <!-- Berita Populer -->
+                    <section class="news-section">
+                        <div class="section-header">
+                            <h2><i class="fas fa-fire"></i> Berita Populer</h2>
+                            <a href="#" class="view-all">Lihat Semua <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="popular-news">
+                            <div class="popular-item">
+                                <span class="popular-number">1</span>
+                                <div class="popular-content">
+                                    <a href="article.html">
+                                        <h4>Harga Sembako di Lubuklinggau Naik Jelang Ramadan, Cabai Tembus Rp 80 Ribu/Kg</h4>
+                                        <span class="meta"><i class="far fa-clock"></i> 1 hari lalu <i class="far fa-eye"></i> 5.4K</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="popular-item">
+                                <span class="popular-number">2</span>
+                                <div class="popular-content">
+                                    <a href="article.html">
+                                        <h4>Banjir Rendam 3 Kelurahan di Lubuklinggau, 200 KK Terdampak</h4>
+                                        <span class="meta"><i class="far fa-clock"></i> 1 hari lalu <i class="far fa-eye"></i> 4.8K</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="popular-item">
+                                <span class="popular-number">3</span>
+                                <div class="popular-content">
+                                    <a href="article.html">
+                                        <h4>Jembatan Watervang Selesai Direnovasi, Lalu Lintas Kembali Normal</h4>
+                                        <span class="meta"><i class="far fa-clock"></i> 2 hari lalu <i class="far fa-eye"></i> 3.9K</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="popular-item">
+                                <span class="popular-number">4</span>
+                                <div class="popular-content">
+                                    <a href="article.html">
+                                        <h4>Kebakaran Hanguskan 5 Rumah di Kelurahan Majapahit, Tidak Ada Korban Jiwa</h4>
+                                        <span class="meta"><i class="far fa-clock"></i> 2 hari lalu <i class="far fa-eye"></i> 3.2K</span>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="popular-item">
+                                <span class="popular-number">5</span>
+                                <div class="popular-content">
+                                    <a href="article.html">
+                                        <h4>Pemuda Lubuklinggau Wakili Sumsel di Ajang Nasional Startup Digital</h4>
+                                        <span class="meta"><i class="far fa-clock"></i> 3 hari lalu <i class="far fa-eye"></i> 2.7K</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Sidebar -->
+                <aside class="sidebar">
+                    <!-- Search Widget -->
+                    <div class="widget">
+                        <h3 class="widget-title">Pencarian</h3>
+                        <form class="sidebar-search">
+                            <input type="text" placeholder="Cari berita...">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </form>
+                    </div>
+
+                    <!-- Kategori Widget -->
+                    <div class="widget">
+                        <h3 class="widget-title">Kategori</h3>
+                        <ul class="category-list">
+                            <li><a href="#">Pemerintahan <span class="count">45</span></a></li>
+                            <li><a href="#">Kriminal <span class="count">32</span></a></li>
+                            <li><a href="#">Pendidikan <span class="count">28</span></a></li>
+                            <li><a href="#">Kesehatan <span class="count">21</span></a></li>
+                            <li><a href="#">Olahraga <span class="count">19</span></a></li>
+                            <li><a href="#">Ekonomi <span class="count">35</span></a></li>
+                            <li><a href="#">Teknologi <span class="count">14</span></a></li>
+                            <li><a href="#">Gaya Hidup <span class="count">22</span></a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Ad Widget -->
+                    <div class="widget">
+                        <div class="sidebar-ad">
+                            <span>IKLAN 300x250</span>
+                        </div>
+                    </div>
+
+                    <!-- Berita Terbaru Widget -->
+                    <div class="widget">
+                        <h3 class="widget-title">Terbaru</h3>
+                        <div class="recent-posts">
+                            <a href="article.html" class="recent-post">
+                                <img src="https://picsum.photos/100/70?random=11" alt="Berita">
+                                <div class="recent-post-info">
+                                    <h4>Perbaikan Jalan Lintas Sumatera di Lubuklinggau Dimulai</h4>
+                                    <span class="meta"><i class="far fa-clock"></i> 30 menit lalu</span>
+                                </div>
+                            </a>
+                            <a href="article.html" class="recent-post">
+                                <img src="https://picsum.photos/100/70?random=12" alt="Berita">
+                                <div class="recent-post-info">
+                                    <h4>Vaksinasi COVID-19 Booster ke-4 Dibuka untuk Lansia</h4>
+                                    <span class="meta"><i class="far fa-clock"></i> 1 jam lalu</span>
+                                </div>
+                            </a>
+                            <a href="article.html" class="recent-post">
+                                <img src="https://picsum.photos/100/70?random=13" alt="Berita">
+                                <div class="recent-post-info">
+                                    <h4>Lomba Mancing Mania di Bendungan Watervang Diikuti 300 Peserta</h4>
+                                    <span class="meta"><i class="far fa-clock"></i> 2 jam lalu</span>
+                                </div>
+                            </a>
+                            <a href="article.html" class="recent-post">
+                                <img src="https://picsum.photos/100/70?random=14" alt="Berita">
+                                <div class="recent-post-info">
+                                    <h4>Harga Kopi Robusta Lubuklinggau Melonjak di Pasar Global</h4>
+                                    <span class="meta"><i class="far fa-clock"></i> 3 jam lalu</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Tags Widget -->
+                    <div class="widget">
+                        <h3 class="widget-title">Tag Populer</h3>
+                        <div class="tags">
+                            <a href="#" class="tag">Lubuklinggau</a>
+                            <a href="#" class="tag">Infrastruktur</a>
+                            <a href="#" class="tag">Pendidikan</a>
+                            <a href="#" class="tag">Banjir</a>
+                            <a href="#" class="tag">DPRD</a>
+                            <a href="#" class="tag">Pilkada</a>
+                            <a href="#" class="tag">Wisata</a>
+                            <a href="#" class="tag">Ekonomi</a>
+                            <a href="#" class="tag">Kesehatan</a>
+                            <a href="#" class="tag">Olahraga</a>
+                        </div>
+                    </div>
+
+                    <!-- Social Media Widget -->
+                    <div class="widget">
+                        <h3 class="widget-title">Ikuti Kami</h3>
+                        <div class="social-links">
+                            <a href="#" class="social-link facebook">
+                                <i class="fab fa-facebook-f"></i>
+                                <span>12.5K</span>
+                                <small>Pengikut</small>
+                            </a>
+                            <a href="#" class="social-link twitter">
+                                <i class="fab fa-twitter"></i>
+                                <span>8.3K</span>
+                                <small>Pengikut</small>
+                            </a>
+                            <a href="#" class="social-link instagram">
+                                <i class="fab fa-instagram"></i>
+                                <span>15.2K</span>
+                                <small>Pengikut</small>
+                            </a>
+                            <a href="#" class="social-link youtube">
+                                <i class="fab fa-youtube"></i>
+                                <span>5.7K</span>
+                                <small>Subscriber</small>
+                            </a>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3 class="footer-title">Info<span>Lubuklinggau</span></h3>
+                    <p>Portal berita terkini dan terpercaya seputar Kota Lubuklinggau dan sekitarnya. Menyajikan informasi aktual, berimbang, dan bermanfaat bagi masyarakat.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Kategori</h4>
+                    <ul>
+                        <li><a href="#">Pemerintahan</a></li>
+                        <li><a href="#">Kriminal</a></li>
+                        <li><a href="#">Pendidikan</a></li>
+                        <li><a href="#">Kesehatan</a></li>
+                        <li><a href="#">Olahraga</a></li>
+                        <li><a href="#">Ekonomi</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Tautan</h4>
+                    <ul>
+                        <li><a href="#">Tentang Kami</a></li>
+                        <li><a href="#">Redaksi</a></li>
+                        <li><a href="#">Pedoman Media</a></li>
+                        <li><a href="#">Kebijakan Privasi</a></li>
+                        <li><a href="#">Disclaimer</a></li>
+                        <li><a href="#">Kontak</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Kontak Redaksi</h4>
+                    <ul class="contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> Jl. Yos Sudarso No. 123, Lubuklinggau</li>
+                        <li><i class="fas fa-phone"></i> (0733) 123-456</li>
+                        <li><i class="fas fa-envelope"></i> redaksi@infolubuklinggau.id</li>
+                        <li><i class="fas fa-clock"></i> Senin - Sabtu, 08.00 - 17.00 WIB</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 InfoLubuklinggau. All Rights Reserved. | Anggota <a href="#">Dewan Pers</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="back-to-top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
