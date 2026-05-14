@@ -2,6 +2,84 @@
 // InfoLubuklinggau - Admin Panel JavaScript
 // ========================================
 
+// ========================================
+// Authentication System
+// ========================================
+// Default credentials - UBAH INI untuk keamanan Anda!
+const ADMIN_ACCOUNTS = [
+    { username: 'admin', password: 'admin123', name: 'Administrator' },
+    { username: 'redaksi', password: 'redaksi123', name: 'Redaksi' }
+];
+
+function isLoggedIn() {
+    const session = sessionStorage.getItem('ilg_admin_session');
+    return session ? JSON.parse(session) : null;
+}
+
+function login(username, password) {
+    const account = ADMIN_ACCOUNTS.find(
+        a => a.username === username && a.password === password
+    );
+    if (account) {
+        sessionStorage.setItem('ilg_admin_session', JSON.stringify({
+            username: account.username,
+            name: account.name,
+            loginTime: new Date().toISOString()
+        }));
+        return true;
+    }
+    return false;
+}
+
+function logout() {
+    sessionStorage.removeItem('ilg_admin_session');
+    window.location.reload();
+}
+
+function checkAuth() {
+    const session = isLoggedIn();
+    const loginOverlay = document.getElementById('login-overlay');
+    
+    if (session) {
+        // User is logged in - hide login, show admin
+        loginOverlay.classList.add('hidden');
+        document.getElementById('admin-name').textContent = session.name;
+    } else {
+        // Not logged in - show login screen
+        loginOverlay.classList.remove('hidden');
+    }
+}
+
+function initAuth() {
+    const loginForm = document.getElementById('login-form');
+    const loginError = document.getElementById('login-error');
+    const logoutBtn = document.getElementById('btn-logout');
+
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        if (login(username, password)) {
+            loginError.textContent = '';
+            checkAuth();
+            refreshDashboard();
+        } else {
+            loginError.textContent = 'Username atau password salah!';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-password').focus();
+        }
+    });
+
+    logoutBtn.addEventListener('click', function() {
+        if (confirm('Yakin ingin keluar dari panel admin?')) {
+            logout();
+        }
+    });
+
+    checkAuth();
+}
+
 // Categories list
 const DEFAULT_CATEGORIES = [
     'Pemerintahan', 'Kriminal', 'Pendidikan', 'Kesehatan',
@@ -459,6 +537,9 @@ function execCommand(command) {
 // Initialize
 // ========================================
 document.addEventListener('DOMContentLoaded', function() {
+
+    // Initialize Authentication
+    initAuth();
 
     // Navigation clicks
     document.querySelectorAll('[data-page]').forEach(el => {
