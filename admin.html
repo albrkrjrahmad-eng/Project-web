@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - InfoLubuklinggau</title>
+    <link rel="stylesheet" href="assets/css/admin.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2 class="sidebar-logo">Info<span>LLG</span></h2>
+            <span class="sidebar-subtitle">Admin Panel</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-page="articles">
+                <i class="fas fa-newspaper"></i>
+                <span>Semua Artikel</span>
+            </a>
+            <a href="#" class="nav-item" data-page="add-article">
+                <i class="fas fa-plus-circle"></i>
+                <span>Tambah Artikel</span>
+            </a>
+            <a href="#" class="nav-item" data-page="categories">
+                <i class="fas fa-folder"></i>
+                <span>Kategori</span>
+            </a>
+            <a href="#" class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Pengaturan</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-external-link-alt"></i>
+                <span>Lihat Website</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-wrapper">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <button class="sidebar-toggle" id="sidebar-toggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="topbar-right">
+                <span class="admin-greeting">Halo, <strong>Admin</strong></span>
+                <div class="admin-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pages -->
+        <main class="content">
+
+            <!-- Dashboard Page -->
+            <div class="page active" id="page-dashboard">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <p>Selamat datang di panel admin InfoLubuklinggau</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-newspaper"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-total">0</h3>
+                            <p>Total Artikel</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-published">0</h3>
+                            <p>Dipublikasi</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fas fa-pencil-alt"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-draft">0</h3>
+                            <p>Draft</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fas fa-folder-open"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-categories">0</h3>
+                            <p>Kategori</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Articles -->
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-clock"></i> Artikel Terbaru</h2>
+                        <a href="#" class="btn btn-sm" data-page="articles">Lihat Semua</a>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Judul</th>
+                                    <th>Kategori</th>
+                                    <th>Tanggal</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-articles">
+                                <tr>
+                                    <td colspan="4" class="empty-state">Belum ada artikel</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Articles Page -->
+            <div class="page" id="page-articles">
+                <div class="page-header">
+                    <h1>Semua Artikel</h1>
+                    <button class="btn btn-primary" data-page="add-article">
+                        <i class="fas fa-plus"></i> Tambah Artikel
+                    </button>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <div class="filter-group">
+                            <select id="filter-category">
+                                <option value="">Semua Kategori</option>
+                            </select>
+                            <select id="filter-status">
+                                <option value="">Semua Status</option>
+                                <option value="published">Dipublikasi</option>
+                                <option value="draft">Draft</option>
+                            </select>
+                        </div>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="search-articles" placeholder="Cari artikel...">
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="select-all"></th>
+                                    <th>Judul</th>
+                                    <th>Kategori</th>
+                                    <th>Penulis</th>
+                                    <th>Tanggal</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="articles-list">
+                                <tr>
+                                    <td colspan="7" class="empty-state">Belum ada artikel</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="panel-footer">
+                        <button class="btn btn-danger btn-sm" id="delete-selected" style="display:none;">
+                            <i class="fas fa-trash"></i> Hapus Terpilih
+                        </button>
+                        <span class="article-count" id="article-count">0 artikel</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add/Edit Article Page -->
+            <div class="page" id="page-add-article">
+                <div class="page-header">
+                    <h1 id="form-title">Tambah Artikel Baru</h1>
+                    <div class="page-actions">
+                        <button class="btn btn-secondary" id="btn-save-draft">
+                            <i class="fas fa-save"></i> Simpan Draft
+                        </button>
+                        <button class="btn btn-primary" id="btn-publish">
+                            <i class="fas fa-paper-plane"></i> Publikasikan
+                        </button>
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-main">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <input type="hidden" id="article-id">
+                                <div class="form-group">
+                                    <label for="article-title">Judul Artikel <span class="required">*</span></label>
+                                    <input type="text" id="article-title" placeholder="Masukkan judul artikel..." class="form-input large">
+                                </div>
+                                <div class="form-group">
+                                    <label for="article-excerpt">Ringkasan</label>
+                                    <textarea id="article-excerpt" placeholder="Tulis ringkasan singkat artikel (tampil di homepage)..." class="form-input" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="article-content">Konten Artikel <span class="required">*</span></label>
+                                    <div class="editor-toolbar">
+                                        <button type="button" class="toolbar-btn" data-command="bold" title="Bold"><i class="fas fa-bold"></i></button>
+                                        <button type="button" class="toolbar-btn" data-command="italic" title="Italic"><i class="fas fa-italic"></i></button>
+                                        <button type="button" class="toolbar-btn" data-command="underline" title="Underline"><i class="fas fa-underline"></i></button>
+                                        <span class="toolbar-separator"></span>
+                                        <button type="button" class="toolbar-btn" data-command="heading" title="Heading"><i class="fas fa-heading"></i></button>
+                                        <button type="button" class="toolbar-btn" data-command="quote" title="Kutipan"><i class="fas fa-quote-right"></i></button>
+                                        <span class="toolbar-separator"></span>
+                                        <button type="button" class="toolbar-btn" data-command="ul" title="Bullet List"><i class="fas fa-list-ul"></i></button>
+                                        <button type="button" class="toolbar-btn" data-command="ol" title="Numbered List"><i class="fas fa-list-ol"></i></button>
+                                        <span class="toolbar-separator"></span>
+                                        <button type="button" class="toolbar-btn" data-command="link" title="Link"><i class="fas fa-link"></i></button>
+                                        <button type="button" class="toolbar-btn" data-command="image" title="Gambar"><i class="fas fa-image"></i></button>
+                                    </div>
+                                    <div id="article-content" class="editor-content" contenteditable="true" placeholder="Tulis konten artikel di sini..."></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-sidebar">
+                        <!-- Featured Image -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Gambar Utama</h3>
+                            </div>
+                            <div class="panel-body">
+                                <div class="image-upload" id="image-upload">
+                                    <div class="image-preview" id="image-preview">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Masukkan URL gambar</p>
+                                    </div>
+                                    <input type="text" id="article-image" placeholder="https://contoh.com/gambar.jpg" class="form-input">
+                                    <button type="button" class="btn btn-sm btn-block" id="btn-preview-image">
+                                        <i class="fas fa-eye"></i> Preview Gambar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Kategori</h3>
+                            </div>
+                            <div class="panel-body">
+                                <select id="article-category" class="form-input">
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Pemerintahan">Pemerintahan</option>
+                                    <option value="Kriminal">Kriminal</option>
+                                    <option value="Pendidikan">Pendidikan</option>
+                                    <option value="Kesehatan">Kesehatan</option>
+                                    <option value="Olahraga">Olahraga</option>
+                                    <option value="Ekonomi">Ekonomi</option>
+                                    <option value="Teknologi">Teknologi</option>
+                                    <option value="Gaya Hidup">Gaya Hidup</option>
+                                    <option value="Politik">Politik</option>
+                                    <option value="Opini">Opini</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Author -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Penulis</h3>
+                            </div>
+                            <div class="panel-body">
+                                <input type="text" id="article-author" placeholder="Nama penulis..." class="form-input">
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="panel">
+                            <div class="panel-header">
+                                <h3>Tags</h3>
+                            </div>
+                            <div class="panel-body">
+                                <input type="text" id="article-tags" placeholder="Pisahkan dengan koma..." class="form-input">
+                                <small class="form-hint">Contoh: infrastruktur, lubuklinggau, jalan</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories Page -->
+            <div class="page" id="page-categories">
+                <div class="page-header">
+                    <h1>Kategori</h1>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2>Daftar Kategori</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="category-grid" id="category-grid">
+                            <!-- Generated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div class="page" id="page-settings">
+                <div class="page-header">
+                    <h1>Pengaturan</h1>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-database"></i> Data Management</h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="settings-group">
+                            <h4>Export Data</h4>
+                            <p>Download semua artikel dalam format JSON</p>
+                            <button class="btn btn-primary" id="btn-export">
+                                <i class="fas fa-download"></i> Export Artikel
+                            </button>
+                        </div>
+                        <div class="settings-group">
+                            <h4>Import Data</h4>
+                            <p>Upload file JSON untuk menambahkan artikel</p>
+                            <input type="file" id="import-file" accept=".json" style="display:none">
+                            <button class="btn btn-secondary" id="btn-import">
+                                <i class="fas fa-upload"></i> Import Artikel
+                            </button>
+                        </div>
+                        <div class="settings-group danger">
+                            <h4>Reset Data</h4>
+                            <p>Hapus semua artikel dan data. Aksi ini tidak dapat dibatalkan!</p>
+                            <button class="btn btn-danger" id="btn-reset">
+                                <i class="fas fa-exclamation-triangle"></i> Reset Semua Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-info-circle"></i> Tentang</h2>
+                    </div>
+                    <div class="panel-body">
+                        <p><strong>InfoLubuklinggau CMS</strong></p>
+                        <p>Versi 1.0 - Sistem Manajemen Konten berbasis LocalStorage</p>
+                        <p>Data tersimpan di browser Anda. Gunakan fitur Export untuk backup.</p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle"></i> Konfirmasi Hapus</h3>
+                <button class="modal-close" id="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-message">Apakah Anda yakin ingin menghapus artikel ini?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modal-cancel">Batal</button>
+                <button class="btn btn-danger" id="modal-confirm">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>
